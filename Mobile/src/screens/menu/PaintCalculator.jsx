@@ -6,10 +6,15 @@ import {
   Text,
   TouchableOpacity,
 } from "react-native";
-import ApiPost from "../../api/HttpApi";  
-
+import { useNavigation } from "@react-navigation/native";
+import { usePaintData } from "../../contex/contex";
+import ApiPost from "../../api/HttpApi";
 
 function PaintCalculator() {
+  const navigation = useNavigation();
+
+  
+  const { setPaintData } = usePaintData();
   const [formatadd, setformatadd] = useState({
     width: "",
     height: "",
@@ -44,11 +49,14 @@ function PaintCalculator() {
   };
 
   async function SendData() {
-    
     const Table = [...addRoom, ...deleteRomm];
-    await ApiPost(Table, "AREA");
-    console.log(Table);
-  };
+    try {
+      const result = await ApiPost(Table, "AREA");
+      setPaintData(result)
+    } catch (error) {
+      console.error(error);
+    }
+  }
 
   return (
     <View style={styles.container}>
@@ -91,7 +99,16 @@ function PaintCalculator() {
       </View>
 
       <TouchableOpacity style={styles.sendButton} onPress={SendData}>
-        <Text style={styles.sendButtonText}>Wyślij</Text>
+        <Text style={styles.button}>Wyślij</Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() => {
+          console.log("Nawigacja do wyników");
+          navigation.navigate("PaintResponseView"); // 👈 BEZ parametrów!
+        }}
+      >
+        <Text style={styles.buttonText}>Zobacz wyniki</Text>
       </TouchableOpacity>
     </View>
   );

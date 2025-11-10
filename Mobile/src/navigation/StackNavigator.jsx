@@ -5,6 +5,7 @@ import LoginView from "../screens/auth/LoginView";
 import RegisterView from "../screens/auth/RegisterView";
 import PaintCalculator from "../screens/menu/PaintCalculator";
 import MainView from "../screens/menu/MainView";
+import PaintResponse from "../screens/paintFuction/PaintResponse";
 
 
 const Stack = createNativeStackNavigator();
@@ -55,6 +56,12 @@ export function MainNavigator(){
             component={PaintCalculator}
             options={{
               title: "Kalkulator Farby"
+            }}/>
+            <StackMain.Screen
+            name ="PaintResponseView"
+            component={PaintResponse}
+            options={{
+              title: "Wyniki Kalkulatora"
             }}/>
         </StackMain.Navigator>
     );
