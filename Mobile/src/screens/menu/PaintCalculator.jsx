@@ -9,8 +9,13 @@ import {
 import { useNavigation } from "@react-navigation/native";
 import { usePaintData } from "../../contex/contex";
 import ApiPost from "../../api/HttpApi";
+import RNPickerSelect from "react-native-picker-select";
+import colors from "../../constats/constats";
 
 function PaintCalculator() {
+
+  const [color, setColor] = useState("WHITE");
+
   const navigation = useNavigation();
 
   
@@ -50,6 +55,8 @@ function PaintCalculator() {
 
   async function SendData() {
     const Table = [...addRoom, ...deleteRomm];
+    Table = {COLOR: color, AREAS: Table};
+    
     try {
       const result = await ApiPost(Table, "AREA");
       setPaintData(result)
@@ -60,6 +67,13 @@ function PaintCalculator() {
 
   return (
     <View style={styles.container}>
+         <View style={{ padding: 20 }}>
+      <RNPickerSelect
+        onValueChange={(value) => setColor(value)}
+        placeholder={{ label: "Wybierz kolor...", value: null }}
+        items={colors}
+      />
+    </View>
       <Text style={styles.sectionTitle}>Dodaj Pomieszczenie</Text>
       <View style={styles.section}>
         <Text style={styles.label}>Podaj Szerokość</Text>
@@ -110,7 +124,10 @@ function PaintCalculator() {
       >
         <Text style={styles.buttonText}>Zobacz wyniki</Text>
       </TouchableOpacity>
+
+     
     </View>
+    
   );
 }
 

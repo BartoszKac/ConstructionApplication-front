@@ -3,7 +3,7 @@ import {
   ViroAmbientLight,
   ViroARScene,
   ViroARSceneNavigator,
-    ViroTrackingReason,
+  ViroTrackingReason,
   ViroTrackingStateConstants,
 } from "@reactvision/react-viro";
 
@@ -11,7 +11,7 @@ import React, {useState} from "react";
 import { StyleSheet } from "react-native";
 
 const HelloWorldSceneAR: React.FC = () => {
-    const [text, setText] = useState("Initializing AR...");
+  const [text, setText] = useState("Initializing AR...");
 
   function onInitialized(state: any, reason: ViroTrackingReason) {
     console.log("onInitialized", state, reason);

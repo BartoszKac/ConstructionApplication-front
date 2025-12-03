@@ -2,9 +2,8 @@ import axios from 'axios';
 
 // Konfiguracja bazowego URL - użyj swojego lokalnego IP
 // Konfiguracja bazowego URL - lokalny adres IP z WiFi
-const BASE_URL = 'http://192.168.1.37:8082'; // Twój aktualny adres IP WiFi
+const BASE_URL = 'http://172.18.224.1:8082'; // Twój aktualny adres IP WiFi
 // WAŻNE: Telefon i komputer muszą być w tej samej sieci WiFi!
-
 function toStringEndpoint(data) {
     const ENDPOINT = {
         REGISTER: "REGISTER",
