@@ -53,17 +53,35 @@ function PaintCalculator() {
     setFormadelete({ width: "", height: "" });
   };
 
-  async function SendData() {
-    const Table = [...addRoom, ...deleteRomm];
-    Table = {COLOR: color, AREAS: Table};
-    
-    try {
-      const result = await ApiPost(Table, "AREA");
-      setPaintData(result)
-    } catch (error) {
-      console.error(error);
-    }
+async function SendData() {
+  if (addRoom.length === 0 && deleteRomm.length === 0) {
+    alert("Dodaj co najmniej jedno pomieszczenie przed wysłaniem!");
+    return;
   }
+
+  if (!color) {
+    alert("Wybierz kolor przed wysłaniem!");
+    return;
+  }
+
+  const areas = [...addRoom, ...deleteRomm];
+  const dataToSend = {
+    color: color,      // ← backend oczekuje małych liter
+    areas: areas
+  };
+
+  console.log("📤 Wysyłam dane:", JSON.stringify(dataToSend, null, 2));
+
+  try {
+    const result = await ApiPost(dataToSend, "AREA");
+    console.log("✅ Odpowiedź serwera:", result);
+    setPaintData(result);
+    alert("✅ Dane wysłane pomyślnie!");
+  } catch (error) {
+    console.error("❌ Błąd wysyłania:", error);
+    alert("❌ Błąd wysyłania danych: " + (error.message || error));
+  }
+}
 
   return (
     <View style={styles.container}>
