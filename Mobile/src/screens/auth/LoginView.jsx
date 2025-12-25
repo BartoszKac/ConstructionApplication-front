@@ -6,10 +6,13 @@ import {
   TouchableOpacity,
   TextInput,
   StyleSheet,
+  KeyboardAvoidingView,
+  Platform,
+  TouchableWithoutFeedback,
+  Keyboard
 } from "react-native";
 
 function LoginView() {
-
   const navigator = useNavigation();
 
   const [form, setForm] = useState({
@@ -17,29 +20,75 @@ function LoginView() {
     password: "",
   });
 
-  const upadatefield = (field, value) => {
+  // Poprawiona funkcja aktualizacji - TextInput przekazuje samą wartość (string)
+  const updateField = (field, value) => {
     setForm({ ...form, [field]: value });
   };
-  return (
-    <View>
-      <TextInput
-        style={styles.input}
-        placeholder="username"
-        onChange={upadatefield}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="password"
-        onChange={upadatefield}
-      />
 
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() => navigator.navigate("MainNavigator")}
-      >
-        <Text style={styles.buttonText}>Zaloguj się</Text>
-      </TouchableOpacity>
-    </View>
+  const handleLogin = () => {
+    // Tutaj dodasz logikę API w przyszłości
+    console.log("Logowanie dla:", form.login);
+    navigator.navigate("MainNavigator");
+  };
+
+  return (
+    // KeyboardAvoidingView zapobiega zasłanianiu pól przez klawiaturę
+    <KeyboardAvoidingView 
+      behavior={Platform.OS === "ios" ? "padding" : "height"} 
+      style={styles.container}
+    >
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <View style={styles.inner}>
+          
+          <View style={styles.headerSection}>
+            <Text style={styles.welcomeText}>Witaj ponownie! 👋</Text>
+            <Text style={styles.subtitleText}>Zaloguj się, aby kontynuować</Text>
+          </View>
+
+          <View style={styles.formSection}>
+            <Text style={styles.inputLabel}>Nazwa użytkownika</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Wpisz login"
+              placeholderTextColor="#A1A1A1"
+              autoCapitalize="none"
+              value={form.login}
+              onChangeText={(val) => updateField("login", val)} // Ważne: onChangeText
+            />
+
+            <Text style={styles.inputLabel}>Hasło</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="••••••••"
+              placeholderTextColor="#A1A1A1"
+              secureTextEntry={true} // Ukrywa znaki hasła
+              value={form.password}
+              onChangeText={(val) => updateField("password", val)}
+            />
+
+            <TouchableOpacity style={styles.forgotBtn}>
+              <Text style={styles.forgotText}>Zapomniałeś hasła?</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+              style={styles.button} 
+              onPress={handleLogin}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.buttonText}>Zaloguj się</Text>
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.footerSection}>
+            <Text style={styles.noAccountText}>Nie masz konta? </Text>
+            <TouchableOpacity onPress={() => navigator.navigate("RegisterView")}>
+              <Text style={styles.signUpText}>Zarejestruj się</Text>
+            </TouchableOpacity>
+          </View>
+
+        </View>
+      </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -48,49 +97,91 @@ export default LoginView;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
-    justifyContent: "center",
-    backgroundColor: "#fff",
+    backgroundColor: "#F8F9FA",
   },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 20,
-    textAlign: "center",
+  inner: {
+    flex: 1,
+    padding: 30,
+    justifyContent: "space-around",
+  },
+  headerSection: {
+    marginTop: 50,
+  },
+  welcomeText: {
+    fontSize: 28,
+    fontWeight: "800",
+    color: "#1A1A1A",
+  },
+  subtitleText: {
+    fontSize: 16,
+    color: "#7C7C7C",
+    marginTop: 8,
+  },
+  formSection: {
+    marginTop: 20,
+  },
+  inputLabel: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#4A4A4A",
+    marginBottom: 8,
+    marginLeft: 4,
   },
   input: {
-    height: 50,
-    borderWidth: 1,
-    borderColor: "#ddd",
-    borderRadius: 8,
-    paddingHorizontal: 15,
-    marginBottom: 15,
+    height: 55,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 14,
+    paddingHorizontal: 20,
+    marginBottom: 20,
     fontSize: 16,
-    backgroundColor: "#f9f9f9",
+    color: "#000",
+    borderWidth: 1,
+    borderColor: "#EFEFEF",
+    // Subtelny cień dla inputów
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  forgotBtn: {
+    alignSelf: "flex-end",
+    marginBottom: 25,
+  },
+  forgotText: {
+    color: "#007AFF",
+    fontWeight: "600",
+    fontSize: 14,
   },
   button: {
     backgroundColor: "#007AFF",
-    padding: 15,
-    borderRadius: 8,
-    marginTop: 10,
+    height: 55,
+    borderRadius: 14,
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#007AFF",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 5,
   },
   buttonText: {
     color: "#fff",
-    textAlign: "center",
-    fontSize: 16,
-    fontWeight: "bold",
+    fontSize: 18,
+    fontWeight: "700",
   },
-  errorText: {
-    color: "#ff3b30",
-    textAlign: "center",
-    marginBottom: 10,
+  footerSection: {
+    flexDirection: "row",
+    justifyContent: "center",
+    marginBottom: 20,
   },
-  linkButton: {
-    marginTop: 15,
+  noAccountText: {
+    color: "#7C7C7C",
+    fontSize: 15,
   },
-  linkText: {
+  signUpText: {
     color: "#007AFF",
-    textAlign: "center",
-    fontSize: 14,
+    fontSize: 15,
+    fontWeight: "700",
   },
 });

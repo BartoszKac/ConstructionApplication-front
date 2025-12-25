@@ -1,49 +1,62 @@
-import {
-  Viro3DObject,
-  ViroAmbientLight,
-  ViroARScene,
-  ViroARSceneNavigator,
-  ViroTrackingReason,
-  ViroTrackingStateConstants,
-} from "@reactvision/react-viro";
-
-import React, {useState} from "react";
+import React, { useState } from "react";
 import { StyleSheet } from "react-native";
 
-const HelloWorldSceneAR: React.FC = () => {
-  const [text, setText] = useState("Initializing AR...");
+import {
+  ViroARScene,
+  ViroARSceneNavigator,
+  ViroAmbientLight,
+  ViroARPlaneSelector,
+  ViroARPlane,
+  ViroQuad,
+  ViroMaterials,
+} from "@reactvision/react-viro";
 
-  function onInitialized(state: any, reason: ViroTrackingReason) {
-    console.log("onInitialized", state, reason);
-    if (state === ViroTrackingStateConstants.TRACKING_NORMAL) {
-      setText("Hello World!");
-    } else if (state === ViroTrackingStateConstants.TRACKING_UNAVAILABLE) {
-      // Handle loss of tracking
-    }
-  }
+/* ===== MATERIAŁY ===== */
+ViroMaterials.createMaterials({
+  red: { diffuseColor: "rgba(255,0,0,0.6)" },
+  green: { diffuseColor: "rgba(0,255,0,0.6)" },
+  blue: { diffuseColor: "rgba(0,0,255,0.6)" },
+  yellow: { diffuseColor: "rgba(255,255,0,0.6)" },
+});
+
+/* ===== SCENA AR ===== */
+const HelloWorldSceneAR: React.FC = () => {
+  const colors = ["red", "green", "blue", "yellow"];
+  const [colorIndex, setColorIndex] = useState(0);
+
+  const changeColor = () => {
+    setColorIndex((prev) => (prev + 1) % colors.length);
+  };
 
   return (
-    <ViroARScene onTrackingUpdated={onInitialized}>
-      {/* Oświetlenie — bez niego model będzie czarny */}
+    <ViroARScene>
       <ViroAmbientLight color="#ffffff" intensity={500} />
 
-      {/* Model 3D */}
-      <Viro3DObject
-        source={require("./assets/skull/12140_Skull_v3_L2.obj")}
-        position={[0, -0.5, -5]}
-        scale={[0.01, 0.01, 0.01]}
-        rotation={[-45, 75, 40]}
-        type="OBJ"
-      />
+      {/* WYKRYWANIE ŚCIANY */}
+      <ViroARPlaneSelector alignment="Vertical">
+        <ViroARPlane alignment="Vertical">
+          
+          {/* KLIKALNA POWIERZCHNIA */}
+          <ViroQuad
+            width={3}
+            height={3}
+            position={[0, 0, 0]}
+            materials={[colors[colorIndex]]}
+            onClick={changeColor}   // 👈 KLIK = ZMIANA KOLORU
+          />
+
+        </ViroARPlane>
+      </ViroARPlaneSelector>
     </ViroARScene>
   );
 };
 
+/* ===== APP ===== */
 export default function App() {
   return (
     <ViroARSceneNavigator
       autofocus
-      initialScene={{ scene: () => <HelloWorldSceneAR /> }}
+      initialScene={{ scene: HelloWorldSceneAR }}
       style={styles.f1}
     />
   );
