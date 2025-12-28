@@ -11,11 +11,14 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
   ScrollView,
-  Alert
+  Alert,
+  ActivityIndicator
 } from "react-native";
+import ApiPost from "../../api/HttpApi";
 
 function RegisterView() {
   const navigator = useNavigation();
+  const [loading, setLoading] = useState(false);
 
   const [form, setForm] = useState({
     login: "",
@@ -28,11 +31,11 @@ function RegisterView() {
     setForm({ ...form, [field]: value });
   };
 
-  const handleRegister = () => {
+  const handleRegister = async () => {
     const { login, email, password, confirmPassword } = form;
 
-    // Prosta walidacja
-    if (!login || !email || !password) {
+    // 1. Walidacja lokalna
+    if (!login || !email || !password || !confirmPassword) {
       Alert.alert("Błąd", "Wypełnij wszystkie pola!");
       return;
     }
@@ -42,10 +45,33 @@ function RegisterView() {
       return;
     }
 
-    console.log("Rejestracja użytkownika:", login);
-    Alert.alert("Sukces", "Konto zostało utworzone!", [
-      { text: "OK", onPress: () => navigator.navigate("LoginView") }
-    ]);
+    setLoading(true);
+
+    try {
+      // 2. Wywołanie API
+      // Klucze obiektu muszą odpowiadać polom w klasie User w Javie
+      const userData = {
+        username: login,
+        email: email,
+        password: password
+      };
+
+      const response = await ApiPost(userData, "REGISTER");
+
+      // 3. Obsługa sukcesu
+      console.log("Rejestracja udana:", response);
+      Alert.alert("Sukces", "Konto zostało utworzone!", [
+        { text: "Zaloguj się", onPress: () => navigator.navigate("LoginView") }
+      ]);
+      
+    } catch (error) {
+      // 4. Obsługa błędów z backendu (np. 400 Bad Request gdy login zajęty)
+      const serverMessage = error.response?.data || "Wystąpił nieoczekiwany błąd";
+      Alert.alert("Błąd rejestracji", serverMessage);
+      console.error("Błąd rejestracji:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -71,6 +97,7 @@ function RegisterView() {
               placeholder="Twój login"
               value={form.login}
               onChangeText={(val) => updateField("login", val)}
+              editable={!loading}
             />
 
             <Text style={styles.inputLabel}>Email</Text>
@@ -81,6 +108,7 @@ function RegisterView() {
               autoCapitalize="none"
               value={form.email}
               onChangeText={(val) => updateField("email", val)}
+              editable={!loading}
             />
 
             <Text style={styles.inputLabel}>Hasło</Text>
@@ -90,6 +118,7 @@ function RegisterView() {
               secureTextEntry
               value={form.password}
               onChangeText={(val) => updateField("password", val)}
+              editable={!loading}
             />
 
             <Text style={styles.inputLabel}>Powtórz hasło</Text>
@@ -99,14 +128,20 @@ function RegisterView() {
               secureTextEntry
               value={form.confirmPassword}
               onChangeText={(val) => updateField("confirmPassword", val)}
+              editable={!loading}
             />
 
             <TouchableOpacity 
-              style={styles.button} 
+              style={[styles.button, loading && styles.buttonDisabled]} 
               onPress={handleRegister}
               activeOpacity={0.8}
+              disabled={loading}
             >
-              <Text style={styles.buttonText}>Zarejestruj się</Text>
+              {loading ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <Text style={styles.buttonText}>Zarejestruj się</Text>
+              )}
             </TouchableOpacity>
           </View>
 
@@ -185,7 +220,7 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
   },
   button: {
-    backgroundColor: "#34C759", // Zielony kolor dla rejestracji (odróżnienie od logowania)
+    backgroundColor: "#34C759",
     height: 55,
     borderRadius: 14,
     justifyContent: "center",
@@ -196,6 +231,9 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 5,
+  },
+  buttonDisabled: {
+    backgroundColor: "#A5D6A7",
   },
   buttonText: {
     color: "#fff",

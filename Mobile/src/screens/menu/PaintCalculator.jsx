@@ -50,7 +50,7 @@ function PaintCalculator() {
     };
 
     try {
-      const result = await ApiPost(dataToSend, "AREA");
+      const result = await ApiPost(dataToSend, "AREA", true);
       setPaintData(result);
       Alert.alert("Sukces", "Dane przeliczone pomyślnie!");
     } catch (error) {

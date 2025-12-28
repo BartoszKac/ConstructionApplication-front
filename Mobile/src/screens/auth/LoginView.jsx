@@ -9,30 +9,63 @@ import {
   KeyboardAvoidingView,
   Platform,
   TouchableWithoutFeedback,
-  Keyboard
+  Keyboard,
+  ActivityIndicator,
+  Alert
 } from "react-native";
+import ApiPost from "../../api/HttpApi";
+import AsyncStorage from '@react-native-async-storage/async-storage'; // Pamiętaj o instalacji!
 
 function LoginView() {
   const navigator = useNavigation();
-
+  const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
     login: "",
     password: "",
   });
 
-  // Poprawiona funkcja aktualizacji - TextInput przekazuje samą wartość (string)
   const updateField = (field, value) => {
     setForm({ ...form, [field]: value });
   };
 
-  const handleLogin = () => {
-    // Tutaj dodasz logikę API w przyszłości
-    console.log("Logowanie dla:", form.login);
-    navigator.navigate("MainNavigator");
+  const handleLogin = async () => {
+    // Prosta walidacja
+    if (!form.login || !form.password) {
+      Alert.alert("Błąd", "Wypełnij wszystkie pola");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      // 1. Wysyłamy żądanie do endpointu LOGIN
+      const response = await ApiPost(
+        { email: form.login, password: form.password }, 
+        "LOGIN"
+      );
+
+      // 2. Zakładamy, że serwer zwraca token w response.token lub response.jwt
+      if ( response.token) {
+        // Zapisujemy token globalnie na dysku
+        //await AsyncStorage.setItem('auth_token', response.token);
+        
+        console.log("Zalogowano pomyślnie!");
+        navigator.navigate("MainNavigator");
+      } else {
+        Alert.alert("Błąd", "Nie otrzymano klucza dostępu od serwera.");
+      }
+    } catch (error) {
+      // Obsługa błędu 403 lub braku sieci
+      const errorMsg = error.response?.status === 403 
+        ? "Błędny login lub hasło" 
+        : "Problem z połączeniem z serwerem";
+      
+      Alert.alert("Logowanie nieudane", errorMsg);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    // KeyboardAvoidingView zapobiega zasłanianiu pól przez klawiaturę
     <KeyboardAvoidingView 
       behavior={Platform.OS === "ios" ? "padding" : "height"} 
       style={styles.container}
@@ -53,7 +86,8 @@ function LoginView() {
               placeholderTextColor="#A1A1A1"
               autoCapitalize="none"
               value={form.login}
-              onChangeText={(val) => updateField("login", val)} // Ważne: onChangeText
+              onChangeText={(val) => updateField("login", val)}
+              editable={!loading} // Blokada podczas ładowania
             />
 
             <Text style={styles.inputLabel}>Hasło</Text>
@@ -61,9 +95,10 @@ function LoginView() {
               style={styles.input}
               placeholder="••••••••"
               placeholderTextColor="#A1A1A1"
-              secureTextEntry={true} // Ukrywa znaki hasła
+              secureTextEntry={true}
               value={form.password}
               onChangeText={(val) => updateField("password", val)}
+              editable={!loading}
             />
 
             <TouchableOpacity style={styles.forgotBtn}>
@@ -71,11 +106,16 @@ function LoginView() {
             </TouchableOpacity>
 
             <TouchableOpacity 
-              style={styles.button} 
+              style={[styles.button, loading && styles.buttonDisabled]} 
               onPress={handleLogin}
               activeOpacity={0.8}
+              disabled={loading}
             >
-              <Text style={styles.buttonText}>Zaloguj się</Text>
+              {loading ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <Text style={styles.buttonText}>Zaloguj się</Text>
+              )}
             </TouchableOpacity>
           </View>
 
@@ -102,10 +142,10 @@ const styles = StyleSheet.create({
   inner: {
     flex: 1,
     padding: 30,
-    justifyContent: "space-around",
+    justifyContent: "center", // Bardziej scentrowany układ
   },
   headerSection: {
-    marginTop: 50,
+    marginBottom: 40,
   },
   welcomeText: {
     fontSize: 28,
@@ -118,7 +158,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   formSection: {
-    marginTop: 20,
+    width: "100%",
   },
   inputLabel: {
     fontSize: 14,
@@ -137,7 +177,6 @@ const styles = StyleSheet.create({
     color: "#000",
     borderWidth: 1,
     borderColor: "#EFEFEF",
-    // Subtelny cień dla inputów
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
@@ -165,6 +204,9 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 5,
   },
+  buttonDisabled: {
+    backgroundColor: "#A1CFFF", // Jaśniejszy kolor gdy przycisk jest nieaktywny
+  },
   buttonText: {
     color: "#fff",
     fontSize: 18,
@@ -173,7 +215,7 @@ const styles = StyleSheet.create({
   footerSection: {
     flexDirection: "row",
     justifyContent: "center",
-    marginBottom: 20,
+    marginTop: 40,
   },
   noAccountText: {
     color: "#7C7C7C",
