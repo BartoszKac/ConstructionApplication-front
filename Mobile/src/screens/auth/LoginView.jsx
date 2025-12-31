@@ -44,13 +44,12 @@ function LoginView() {
       );
 
       // 2. Zakładamy, że serwer zwraca token w response.token lub response.jwt
-      if ( response.token) {
-        // Zapisujemy token globalnie na dysku
-        //await AsyncStorage.setItem('auth_token', response.token);
-        
-        console.log("Zalogowano pomyślnie!");
-        navigator.navigate("MainNavigator");
-      } else {
+   // NOWY KOD (poprawny)
+    if (response.token) {
+      console.log("Zalogowano pomyślnie!");
+      // Używamy 'replace', aby użytkownik nie mógł wrócić do logowania przyciskiem 'back'
+      navigator.replace("MainView"); 
+    } else {
         Alert.alert("Błąd", "Nie otrzymano klucza dostępu od serwera.");
       }
     } catch (error) {

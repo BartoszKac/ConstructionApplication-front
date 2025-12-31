@@ -11,10 +11,10 @@ import {
   Alert
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { usePaintData } from "../../contex/contex";
-import ApiPost from "../../api/HttpApi";
+import { usePaintData } from "../../../../contex/contex";
+import ApiPost from "../../../../api/HttpApi";
 import RNPickerSelect from "react-native-picker-select";
-import colors from "../../constats/constats";
+import colors from "../../../../constats/constats";
 
 function PaintCalculator() {
   const [color, setColor] = useState("WHITE");
