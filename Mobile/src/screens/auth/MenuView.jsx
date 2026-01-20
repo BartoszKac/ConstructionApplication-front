@@ -1,5 +1,5 @@
 import React from "react";
-import { View, TouchableOpacity, Text, StyleSheet, SafeAreaView, Image } from "react-native";
+import { View, TouchableOpacity, Text, StyleSheet, SafeAreaView } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 
 function MenuView() {
@@ -7,16 +7,20 @@ function MenuView() {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Sekcja Górna - Logo i Powitanie */}
+      {/* Sekcja Górna - Nowy Branding Remontowy */}
       <View style={styles.topSection}>
         <View style={styles.logoCircle}>
-          <Text style={{ fontSize: 50 }}>🎨</Text>
+          {/* Zmiana ikony na bardziej uniwersalną dla remontu */}
+          <Text style={{ fontSize: 50 }}>🏠</Text>
         </View>
-        <Text style={styles.title}>PaintMaster</Text>
-        <Text style={styles.subtitle}>Twoje narzędzie do profesjonalnych obliczeń malarskich</Text>
+        <Text style={styles.title}>RemontMaster</Text>
+        <Text style={styles.subtitle}>
+          Kompleksowy asystent Twojego remontu.{"\n"}
+          Obliczaj, wizualizuj i planuj koszty.
+        </Text>
       </View>
 
-      {/* Sekcja Dolna - Przyciski */}
+      {/* Sekcja Dolna - Tylko Logowanie i Rejestracja */}
       <View style={styles.bottomSection}>
         <TouchableOpacity
           style={styles.loginButton}
@@ -34,9 +38,9 @@ function MenuView() {
           <Text style={styles.registerButtonText}>Utwórz konto</Text>
         </TouchableOpacity>
 
-        <Text style={styles.guestText}>
-          Kontynuuj jako <Text style={styles.guestLink}>Gość</Text>
-        </Text>
+        <View style={styles.footerNote}>
+          <Text style={styles.footerText}>Wszystkie dane projektów w jednym miejscu</Text>
+        </View>
       </View>
     </SafeAreaView>
   );
@@ -56,74 +60,79 @@ const styles = StyleSheet.create({
     paddingHorizontal: 30,
   },
   logoCircle: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: "#F0F0F7",
+    width: 110,
+    height: 110,
+    borderRadius: 55,
+    backgroundColor: "#F8F9FA",
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 20,
-    // Cień dla logo
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-    elevation: 5,
+    // Solidniejszy cień dla efektu premium
+    shadowColor: "#4C6EF5",
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.15,
+    shadowRadius: 15,
+    elevation: 8,
   },
   title: {
-    fontSize: 32,
-    fontWeight: "800",
-    color: "#1C1C1E",
-    letterSpacing: 1,
+    fontSize: 34,
+    fontWeight: "900",
+    color: "#212529",
+    letterSpacing: -0.5,
   },
   subtitle: {
-    fontSize: 16,
-    color: "#8E8E93",
+    fontSize: 15,
+    color: "#868E96",
     textAlign: "center",
-    marginTop: 10,
+    marginTop: 15,
     lineHeight: 22,
+    fontWeight: "500",
   },
   bottomSection: {
     flex: 1,
     paddingHorizontal: 30,
     justifyContent: "center",
+    paddingBottom: 20,
   },
   loginButton: {
-    backgroundColor: "#007AFF",
-    height: 55,
-    borderRadius: 15,
+    backgroundColor: "#4C6EF5", // Nowoczesny niebieski
+    height: 60,
+    borderRadius: 18,
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 15,
+    shadowColor: "#4C6EF5",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
   },
   loginButtonText: {
     color: "#FFFFFF",
     fontSize: 18,
-    fontWeight: "600",
+    fontWeight: "700",
   },
   registerButton: {
     backgroundColor: "transparent",
-    height: 55,
-    borderRadius: 15,
+    height: 60,
+    borderRadius: 18,
     justifyContent: "center",
     alignItems: "center",
     borderWidth: 2,
-    borderColor: "#007AFF",
+    borderColor: "#E9ECEF", // Delikatniejsza ramka dla rejestracji
   },
   registerButtonText: {
-    color: "#007AFF",
+    color: "#495057",
     fontSize: 18,
-    fontWeight: "600",
-  },
-  guestText: {
-    textAlign: "center",
-    marginTop: 25,
-    color: "#8E8E93",
-    fontSize: 14,
-  },
-  guestLink: {
-    color: "#1C1C1E",
     fontWeight: "700",
-    textDecorationLine: "underline",
+  },
+  footerNote: {
+    marginTop: 30,
+    alignItems: "center",
+  },
+  footerText: {
+    color: "#ADB5BD",
+    fontSize: 12,
+    fontWeight: "600",
   },
 });

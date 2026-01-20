@@ -1,11 +1,27 @@
 import axios from 'axios';
 
-const BASE_URL = 'http://192.168.1.37:8085';
+// WSKAZÓWKA DLA EXPO GO: 
+// Jeśli testujesz na fizycznym telefonie, zmień '127.0.0.1' na IP swojego komputera (np. '192.168.1.15')
+const BASE_IP = '127.0.0.1'; 
+
+const JAVA_URL = `http://${BASE_IP}:8082`; 
+const PYTHON_URL = `http://${BASE_IP}:8087`; 
+const TILES_URL = `http://${BASE_IP}:8089`; 
 
 let globalToken = null;
 
-function setGlobalToken(token) {
+export function setGlobalToken(token) {
     globalToken = token;
+}
+
+function getBaseUrl(endpointName) {
+    if (endpointName === "INITPAINT" || endpointName === "PAINT") {
+        return PYTHON_URL;
+    }
+    if (endpointName === "TILES") {
+        return TILES_URL;
+    }
+    return JAVA_URL;
 }
 
 function toStringEndpoint(type) {
@@ -14,23 +30,21 @@ function toStringEndpoint(type) {
         AREA: "/sendAreaSet",
         LOGIN: "/login",
         INITPAINT: "/initialize",
-        PAINT: "/paint"
+        PAINT: "/paint",
+        TILES: "/tiles"
     };
-
     return ENDPOINTS[type] || type;
 }
 
 async function ApiPost(data, endpointName, token = false) {
+    const baseUrl = getBaseUrl(endpointName);
+    const endpoint = toStringEndpoint(endpointName);
+    const URL = `${baseUrl}${endpoint}`;
+
     try {
-        const endpoint = toStringEndpoint(endpointName);
-        const URL = `${BASE_URL}${endpoint}`;
-
-        // 1. DYNAMICZNE USTAWIANIE NAGŁÓWKÓW
         const headers = {};
-
+        
         if (endpointName === "INITPAINT") {
-            // Przy wysyłaniu zdjęć (FormData) NIE ustawiamy Content-Type ręcznie,
-            // Axios zrobi to sam, dodając odpowiedni "boundary"
             headers['Content-Type'] = 'multipart/form-data';
         } else {
             headers['Content-Type'] = 'application/json';
@@ -40,29 +54,41 @@ async function ApiPost(data, endpointName, token = false) {
             headers['Authorization'] = `Bearer ${globalToken}`;
         }
 
-        console.log('=== Request Debug Info ===');
-        console.log('URL:', URL);
-        console.log('Endpoint Name:', endpointName);
-        console.log('Content-Type:', headers['Content-Type']);
-        console.log('========================');
+        // Dynamiczny timeout: Scraping potrzebuje więcej czasu niż zwykły login
+        const timeoutValue = endpointName === "INITPAINT" ? 60000 
+                           : endpointName === "TILES" ? 30000 
+                           : 15000;
 
-        // 2. WYKONANIE ŻĄDANIA
-        const response = await axios.post(URL, data, { headers });
+        console.log(`[REQ] ${endpointName} -> ${URL}`);
+
+        const response = await axios.post(URL, data, { 
+            headers,
+            timeout: timeoutValue 
+        });
+
+        // --- INSPEKCJA ---
+        if (["PAINT", "AREA", "TILES"].includes(endpointName)) {
+            console.log(`--- 📊 INSPEKCJA DANYCH: ${endpointName} ---`);
+            if (response.data) {
+                const count = Array.isArray(response.data.data) ? response.data.data.length : 0;
+                console.log(`Status: ${response.data.status}, Elementów: ${count}`);
+            }
+        }
 
         if ((endpointName === "LOGIN" || endpointName === "REGISTER") && response.data.token) {
             setGlobalToken(response.data.token);
         }
 
-        console.log('Odpowiedź sukces:', response.data);
         return response.data;
 
     } catch (error) {
-        console.error('Szczegóły błędu:', {
-            message: error.message,
-            status: error.response?.status,
-            data: error.response?.data,
-            url: error.config?.url
-        });
+        console.log(`--- 🛑 BŁĄD API: ${endpointName} 🛑 ---`);
+        if (error.response) {
+            console.log("Status:", error.response.status);
+            console.log("Treść:", error.response.data);
+        } else {
+            console.log("Błąd połączenia/Timeout:", error.message);
+        }
         throw error;
     }
 }

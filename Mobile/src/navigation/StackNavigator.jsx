@@ -8,7 +8,11 @@ import RegisterView from "../screens/auth/RegisterView";
 import MainView from "../screens/menu/MainView";
 import PaintCalculator from "../screens/menu/logicView/paintFuction/PaintCalculator";
 import PaintResponse from "../screens/menu/logicView/paintFuction/PaintResponse";
+import PaintAnalysis from "../screens/menu/logicView/paintFuction/PaintAnalysis";
+import TilesView from "../screens/menu/logicView/TilesView/TilesView";
+import TilesResponseView from "../screens/menu/logicView/TilesView/TilesResponseView";
  // Załóżmy, że masz te komponenty:
+
  import LogicView from "../screens/menu/logicView/LogicView";
  import VisualView from "../screens/menu/visualView/VisualView";
  import MyNoteView from "../screens/menu/noteView/MyNoteView";
@@ -30,6 +34,9 @@ export function LogicNavigator() {
       <LogicStack.Screen name="LogicHome" component={LogicView} options={{ title: "Logika" }} />
       <LogicStack.Screen name="PaintView" component={PaintCalculator} options={{ title: "Kalkulator Farby" }} />
       <LogicStack.Screen name="PaintResponseView" component={PaintResponse} options={{ title: "Wyniki" }} />
+      <LogicStack.Screen name="PaintAnalysisView" component={PaintAnalysis} options={{ title: "Analityka Cenowa" }} />
+        <LogicStack.Screen name="TilesView" component={TilesView} />
+        <LogicStack.Screen name="TilesResponseView" component={TilesResponseView} options={{ title: "Wyniki Płytek" }} />
     </LogicStack.Navigator>
   );
 }
