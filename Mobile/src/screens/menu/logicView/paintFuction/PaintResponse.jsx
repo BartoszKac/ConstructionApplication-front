@@ -4,6 +4,18 @@ import { usePaintData } from "../../../../contex/contex";
 import { loadFolders, saveFolders } from "../../../../storage/StorageService";
 import { useNavigation } from "@react-navigation/native";
 
+// 1. SŁOWNIK TŁUMACZEŃ (Mapowanie kluczy z API na Polski)
+const fieldTranslations = {
+  price_value: "Cena za sztukę",
+  liters: "Pojemność (L)",
+  "m^2": "Wydajność (m²/L)",
+  coverage_m2: "Pokrycie z opakowania (m²)",
+  cans_needed: "Potrzebne opakowania",
+  calculated_cost: "Koszt całkowity",
+  itemLocation_country: "Kraj wysyłki",
+  itemLocation_postalCode: "Kod pocztowy",
+};
+
 function PaintResponse() {
   const { paintData } = usePaintData();
   const navigation = useNavigation();
@@ -48,12 +60,12 @@ function PaintResponse() {
   };
 
   const stats = useMemo(() => {
-    if (!paintData) return { min: "---", count: 0, avg: "---" };
+    if (!paintData) return { min: "---", count: 0 };
     const all = [...(paintData.scraping || []), ...(paintData.mapper || [])];
     const costs = all
       .map(item => parseFloat(item.calculated_cost))
       .filter(c => !isNaN(c) && c > 0);
-    if (costs.length === 0) return { min: "---", count: all.length, avg: "---" };
+    if (costs.length === 0) return { min: "---", count: all.length };
     const min = Math.min(...costs);
     return { min: min.toFixed(2), count: all.length };
   }, [paintData]);
@@ -61,11 +73,12 @@ function PaintResponse() {
   const renderCard = (item, index) => {
     const cost = parseFloat(item.calculated_cost);
     const isBest = cost && cost.toFixed(2) === stats.min;
-    const skipKeys = ["image_imageUrl", "itemWebUrl", "url", "itemId", "currency"];
+    
+    // 2. KLUCZE DO POMINIĘCIA (Dodaliśmy "title", bo jest już nagłówkiem karty)
+    const skipKeys = ["image_imageUrl", "itemWebUrl", "url", "itemId", "currency", "title"];
 
     return (
       <View key={`${index}-${item.title}`} style={[styles.card, isBest && styles.bestCard]}>
-        {/* POPRAWKA 1: Rzutowanie na Boolean !!isBest */}
         {!!isBest && (
           <View style={styles.bestBadge}>
             <Text style={styles.bestBadgeText}>NAJLEPSZA CENA PROJEKTU 🏆</Text>
@@ -80,13 +93,27 @@ function PaintResponse() {
         <View style={styles.divider} />
 
         {Object.entries(item).map(([key, val]) => {
+          // Pomijamy klucze techniczne oraz puste wartości
           if (skipKeys.includes(key) || typeof val === 'object' || val === null || val === undefined) return null;
+          
+          // Tłumaczymy klucz (jeśli nie ma w słowniku, usuwamy tylko podkreślniki)
+          const translatedKey = fieldTranslations[key] || key.replace(/_/g, ' ');
+          
+          // 3. FORMATOWANIE WARTOŚCI (Zaokrąglanie liczb)
+          let displayVal = val;
+          if (key === 'cans_needed') {
+             // Jeśli liczba puszek to np. 0.25, pokazujemy 0.25, ale jeśli 1.0000 -> 1
+             displayVal = parseFloat(val).toFixed(2); 
+          }
+          if (key === 'calculated_cost' || key === 'price_value') {
+             displayVal = parseFloat(val).toFixed(2);
+          }
+
           return (
             <View key={key} style={styles.infoRow}>
-              <Text style={styles.infoKey}>{key.replace(/_/g, ' ')}:</Text>
-              {/* POPRAWKA 2: Stringi w jednej linii bez spacji przed/po klamrach */}
+              <Text style={styles.infoKey}>{translatedKey}:</Text>
               <Text style={[styles.infoValue, key === 'calculated_cost' && styles.priceText]}>
-                {val}{key === 'calculated_cost' ? ' PLN' : ''}
+                {displayVal}{key === 'calculated_cost' || key === 'price_value' ? ' PLN' : ''}
               </Text>
             </View>
           );
@@ -116,8 +143,7 @@ function PaintResponse() {
     <View style={styles.mainContainer}>
       <View style={styles.headerPanel}>
         <View style={styles.statBox}>
-          <Text style={styles.statLabel}>Najniższy koszt</Text>
-          {/* POPRAWKA 3: Bezpośrednie renderowanie bez spacji */}
+          <Text style={styles.statLabel}>Najniższy koszt całkowity</Text>
           <Text style={styles.statValue}>{stats.min} PLN</Text>
         </View>
         <View style={styles.controls}>
@@ -136,23 +162,22 @@ function PaintResponse() {
       <ScrollView contentContainerStyle={{ padding: 16 }}>
         {isSorted ? (
           <>
-            <Text style={styles.sectionHeader}>💰 Posortowane według ceny całkowitej</Text>
+            <Text style={styles.sectionHeader}>💰 Posortowane cenowo</Text>
             {[...(paintData.scraping || []), ...(paintData.mapper || [])]
               .sort((a, b) => parseFloat(a.calculated_cost) - parseFloat(b.calculated_cost))
               .map((item, i) => renderCard(item, i))}
           </>
         ) : (
           <>
-            {/* POPRAWKA 4: Rzutowanie długości tablicy na Boolean */}
             {!!(paintData.scraping?.length > 0) && (
               <>
-                <Text style={styles.sectionHeader}>🛒 Oferty z Marketów (Scraping)</Text>
+                <Text style={styles.sectionHeader}>🛒 Oferty z Marketów (PL)</Text>
                 {paintData.scraping.map((item, i) => renderCard(item, i))}
               </>
             )}
             {!!(paintData.mapper?.length > 0) && (
               <>
-                <Text style={[styles.sectionHeader, { marginTop: 20 }]}>🌎 Oferty Globalne (Ebay/API)</Text>
+                <Text style={[styles.sectionHeader, { marginTop: 20 }]}>🌎 Oferty Globalne (eBay)</Text>
                 {paintData.mapper.map((item, i) => renderCard(item, i))}
               </>
             )}
@@ -183,9 +208,6 @@ function PaintResponse() {
     </View>
   );
 }
-
-
-
 
 const styles = StyleSheet.create({
   mainContainer: { flex: 1, backgroundColor: "#F1F3F5" },
@@ -220,7 +242,8 @@ const styles = StyleSheet.create({
   folderItem: { padding: 15, borderBottomWidth: 1, borderBottomColor: "#eee" },
   folderText: { fontSize: 16 },
   closeBtn: { marginTop: 15, alignItems: "center", padding: 10 },
-  center: { flex: 1, justifyContent: "center", alignItems: "center" }
+  center: { flex: 1, justifyContent: "center", alignItems: "center" },
+  empty: { textAlign: 'center', marginTop: 20, color: '#999' }
 });
 
 export default PaintResponse;

@@ -10,9 +10,9 @@ function MainView() {
       <StatusBar barStyle="dark-content" />
       
       <View style={styles.header}>
-        <Text style={styles.welcomeText}>Witaj w</Text>
-        <Text style={styles.brandText}>PaintMaster Pro 🎨</Text>
-      </View>
+  <Text style={styles.welcomeText}>Dzień dobry,</Text> 
+  <Text style={styles.brandText}>Panel główny</Text>
+</View>
 
       <ScrollView contentContainerStyle={styles.menuGrid}>
         

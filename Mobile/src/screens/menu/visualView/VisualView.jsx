@@ -26,15 +26,7 @@ function VisualView() {
         </TouchableOpacity>
 
         {/* Karta: Palety Kolorów */}
-        <TouchableOpacity style={styles.card} activeOpacity={0.8}>
-          <View style={[styles.iconBox, { backgroundColor: '#F3E5F5' }]}>
-            <Text style={{ fontSize: 30 }}>🎨</Text>
-          </View>
-          <View style={styles.cardText}>
-            <Text style={styles.cardTitle}>Palety Inspiracji</Text>
-            <Text style={styles.cardSubtitle}>Przeglądaj gotowe zestawy kolorystyczne</Text>
-          </View>
-        </TouchableOpacity>
+       
       </ScrollView>
     </SafeAreaView>
   );
