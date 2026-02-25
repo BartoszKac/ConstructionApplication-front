@@ -26,7 +26,7 @@ const LogicStack = createNativeStackNavigator();
 const VisualStack = createNativeStackNavigator();
 const NoteStack = createNativeStackNavigator();
 
-// --- SEKTY POSZCZEGÓLNYCH FUNKCJI ---
+
 
 export function LogicNavigator() {
   return (

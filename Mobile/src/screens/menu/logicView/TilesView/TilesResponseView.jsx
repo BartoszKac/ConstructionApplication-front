@@ -130,7 +130,7 @@ function TilesResponseView() {
       {/* HEADER I LISTA */}
       <View style={styles.topBar}>
         <TouchableOpacity onPress={() => navigation.goBack()}><Text style={styles.backBtnText}>❮ POWRÓT</Text></TouchableOpacity>
-        <Text style={styles.topBarTitle}>WYNIKI DLA {projectInfo.size}</Text>
+        <Text style={styles.topBarTitle}>   WYNIKI DLA {projectInfo.size}</Text>
         <View style={{ width: 50 }} />
       </View>
 

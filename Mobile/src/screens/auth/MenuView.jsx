@@ -13,7 +13,7 @@ function MenuView() {
           {/* Zmiana ikony na bardziej uniwersalną dla remontu */}
           <Text style={{ fontSize: 50 }}>🏠</Text>
         </View>
-        <Text style={styles.title}>RemontMaster</Text>
+        <Text style={styles.title}>Aplikacja Remontowa</Text>
         <Text style={styles.subtitle}>
           Kompleksowy asystent Twojego remontu.{"\n"}
           Obliczaj, wizualizuj i planuj koszty.
@@ -75,7 +75,7 @@ const styles = StyleSheet.create({
     elevation: 8,
   },
   title: {
-    fontSize: 34,
+    fontSize: 30,
     fontWeight: "900",
     color: "#212529",
     letterSpacing: -0.5,

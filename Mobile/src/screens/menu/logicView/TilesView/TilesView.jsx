@@ -81,7 +81,7 @@ function TilesView() {
       const response = await ApiPost({
         size: selectedSize,
         area: totalResult.gross
-      }, "TILES");
+      }, "TILES",true);
 
       if (response.status === "success" && response.data.length > 0) {
         // NAWIGACJA DO NOWEGO EKRANU Z DANYMI

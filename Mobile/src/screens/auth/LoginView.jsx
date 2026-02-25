@@ -101,7 +101,7 @@ function LoginView() {
             />
 
             <TouchableOpacity style={styles.forgotBtn}>
-              <Text style={styles.forgotText}></Text>
+              <Text style={styles.forgotText}>Zapomniałeś hasła?</Text>
             </TouchableOpacity>
 
             <TouchableOpacity 

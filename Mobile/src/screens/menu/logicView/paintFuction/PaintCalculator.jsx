@@ -17,6 +17,19 @@ import ApiPost from "../../../../api/HttpApi";
 import RNPickerSelect from "react-native-picker-select";
 import colors from "../../../../constats/constats";
 
+// --- LOGIKA WYEKSPORTOWANA DO TESTÓW AUTOMATYCZNYCH ---
+export const calculateLocalArea = (addRoom, deleteRoom) => {
+  const addArea = addRoom.reduce(
+    (acc, curr) => acc + (parseFloat(curr.width || 0) * parseFloat(curr.height || 0)), 
+    0
+  );
+  const subArea = deleteRoom.reduce(
+    (acc, curr) => acc + (parseFloat(curr.width || 0) * parseFloat(curr.height || 0)), 
+    0
+  );
+  return (addArea - subArea).toFixed(2);
+};
+
 function PaintCalculator() {
   const [color, setColor] = useState("WHITE");
   const navigation = useNavigation();
@@ -27,7 +40,6 @@ function PaintCalculator() {
   const [addRoom, setRooms] = useState([]);
   const [deleteRomm, delRooms] = useState([]);
 
-  // Nowe stany dla wyniku "na żywo"
   const [calculatedArea, setCalculatedArea] = useState(null);
   const [loading, setLoading] = useState(false);
 
@@ -43,13 +55,7 @@ function PaintCalculator() {
     setFormadelete({ width: "", height: "" });
   };
 
-  // Lokalna funkcja licząca metraż netto przed wysyłką
-  const calculateLocalArea = () => {
-    let addArea = addRoom.reduce((acc, curr) => acc + (parseFloat(curr.width) * parseFloat(curr.height)), 0);
-    let subArea = deleteRomm.reduce((acc, curr) => acc + (parseFloat(curr.width) * parseFloat(curr.height)), 0);
-    return (addArea - subArea).toFixed(2);
-  };
-
+  // --- GŁÓWNA FUNKCJA WYSYŁAJĄCA ---
   async function SendData() {
     if (addRoom.length === 0 && deleteRomm.length === 0) {
       Alert.alert("Uwaga", "Dodaj co najmniej jedno pomieszczenie!");
@@ -57,8 +63,10 @@ function PaintCalculator() {
     }
 
     setLoading(true);
-    const areaResult = calculateLocalArea();
-    setCalculatedArea(areaResult); // Pokazujemy wynik na dole
+    
+    // Wywołanie funkcji zewnętrznej z aktualnym stanem
+    const areaResult = calculateLocalArea(addRoom, deleteRomm);
+    setCalculatedArea(areaResult); 
 
     const dataToSend = {
       color: color,
@@ -68,7 +76,6 @@ function PaintCalculator() {
     try {
       const result = await ApiPost(dataToSend, "AREA", true);
       setPaintData(result);
-      // Nie robimy nawigacji od razu, pozwalamy użytkownikowi zobaczyć wynik na dole
       Alert.alert("Sukces", "Dane przeliczone pomyślnie!");
     } catch (error) {
       Alert.alert("Błąd", "Nie udało się wysłać danych.");
@@ -85,7 +92,6 @@ function PaintCalculator() {
       <ScrollView contentContainerStyle={styles.container}>
         <Text style={styles.mainTitle}>Kalkulator Malowania 🎨</Text>
 
-        {/* Sekcja Koloru */}
         <View style={styles.card}>
           <Text style={styles.label}>Wybierz kolor ścian</Text>
           <RNPickerSelect
@@ -97,7 +103,6 @@ function PaintCalculator() {
           />
         </View>
 
-        {/* Sekcja Dodawania */}
         <View style={styles.card}>
           <View style={styles.cardHeader}>
             <Text style={styles.sectionTitle}>➕ Dodaj powierzchnię</Text>
@@ -124,7 +129,6 @@ function PaintCalculator() {
           </TouchableOpacity>
         </View>
 
-        {/* Sekcja Odejmowania */}
         <View style={styles.card}>
           <View style={styles.cardHeader}>
             <Text style={styles.sectionTitle}>➖ Odejmij (Okna/Drzwi)</Text>
@@ -151,7 +155,6 @@ function PaintCalculator() {
           </TouchableOpacity>
         </View>
 
-        {/* SEKACJA WYNIKU (Pojawia się po kliknięciu OBLICZ) */}
         {calculatedArea && (
           <View style={styles.summaryCard}>
             <Text style={styles.summaryLabel}>POWIERZCHNIA DO MALOWANIA:</Text>
@@ -176,9 +179,7 @@ function PaintCalculator() {
   );
 }
 
-// Dodane i zmodyfikowane style
 const styles = StyleSheet.create({
-  // ... Twoje poprzednie style bez zmian ...
   container: { padding: 20, backgroundColor: "#F2F2F7" },
   mainTitle: { fontSize: 26, fontWeight: "800", color: "#1C1C1E", marginBottom: 25, marginTop: 40, textAlign: "center" },
   card: { backgroundColor: "#fff", borderRadius: 16, padding: 16, marginBottom: 20, elevation: 3 },
@@ -192,10 +193,8 @@ const styles = StyleSheet.create({
   buttonText: { color: "#fff", fontSize: 15, fontWeight: "600" },
   badge: { backgroundColor: '#34C759', borderRadius: 10, paddingHorizontal: 8, paddingVertical: 2 },
   badgeText: { color: '#fff', fontSize: 12, fontWeight: 'bold' },
-  
-  // NOWE STYLE DLA PODSUMOWANIA
   summaryCard: {
-    backgroundColor: "#1C1C1E", // Ciemne tło dla kontrastu
+    backgroundColor: "#1C1C1E",
     borderRadius: 16,
     padding: 20,
     alignItems: 'center',
@@ -212,13 +211,11 @@ const styles = StyleSheet.create({
     alignItems: 'center'
   },
   nextStepText: { color: "#fff", fontWeight: "800", fontSize: 14 },
-
   footer: { marginTop: 10, marginBottom: 40 },
   sendButton: { backgroundColor: "#007AFF", padding: 18, borderRadius: 16, alignItems: "center" },
   sendButtonText: { color: "#fff", fontSize: 18, fontWeight: "700", letterSpacing: 1 },
 });
 
-// Picker styles bez zmian...
 const pickerSelectStyles = StyleSheet.create({
   inputIOS: { fontSize: 16, paddingVertical: 12, paddingHorizontal: 10, borderWidth: 1, borderColor: '#D1D1D6', borderRadius: 12, color: 'black', backgroundColor: '#fff' },
   inputAndroid: { fontSize: 16, paddingHorizontal: 10, paddingVertical: 8, borderWidth: 1, borderColor: '#D1D1D6', borderRadius: 12, color: 'black', backgroundColor: '#fff' },
